@@ -18,11 +18,14 @@ public class CellularArea {
     private Double cellWidth;
     private Double cellHeight;
 
+    private List<Integer> id = new ArrayList<>();
+    private List<CellularArea> children = new ArrayList<>();
 
 
     public CellularArea(Double startX, Double startY,
                         Double finishX, Double finishY,
-                        Integer cellsX, Integer cellsY) {
+                        Integer cellsX, Integer cellsY,
+                        List<Integer> id) {
 
         this.startX = startX;
         this.startY = startY;
@@ -33,11 +36,16 @@ public class CellularArea {
 
         this.cellWidth  = (this.finishX-this.startX) / this.cellsX;
         this.cellHeight = (this.finishY-this.startY) / this.cellsY;
+        this.id = id;
+
+        // if we really have a fragmentation
+        if (cellsX != 1 || cellsY != 1) { this.initializeChildren(); }
     }
 
     public CellularArea(Pair<Double, Double> startCoords,
                         Pair<Double, Double> finishCoords,
-                        Pair<Integer, Integer> cellsNumbers) {
+                        Pair<Integer, Integer> cellsNumbers,
+                        List<Integer> id) {
 
         this.startX = startCoords.getKey();
         this.startY = startCoords.getValue();
@@ -48,60 +56,50 @@ public class CellularArea {
 
         this.cellWidth  = (this.finishX-this.startX) / this.cellsX;
         this.cellHeight = (this.finishY-this.startY) / this.cellsY;
+        this.id = id;
+
+        // if we really have a fragmentation
+        if (this.cellsX != 1 || this.cellsY != 1) { this.initializeChildren(); }
     }
 
     public Double getStartX() {
         return startX;
     }
 
-    public void setStartX(Double startX) {
-        this.startX = startX;
-        this.cellWidth  = (this.finishX-this.startX) / this.cellsX;
-    }
-
     public Double getStartY() {
         return startY;
-    }
-
-    public void setStartY(Double startY) {
-        this.startY = startY;
-        this.cellHeight  = (this.finishY-this.startY) / this.cellsY;
     }
 
     public Double getFinishX() {
         return finishX;
     }
 
-    public void setFinishX(Double finishX) {
-        this.finishX = finishX;
-        this.cellWidth  = (this.finishX-this.startX) / this.cellsX;
-    }
-
     public Double getFinishY() {
         return finishY;
-    }
-
-    public void setFinishY(Double finishY) {
-        this.finishY = finishY;
-        this.cellHeight  = (this.finishY-this.startY) / this.cellsY;
     }
 
     public Integer getCellsX() {
         return cellsX;
     }
 
-    public void setCellsX(Integer cellsX) {
-        this.cellsX = cellsX;
-        this.cellWidth  = (this.finishX-this.startX) / this.cellsX;
+    // actually, method can be invoked
+    // only when this cell w/o children
+    public void setCellsXY(Integer cellsX, Integer cellsY) {
+
+        if (this.cellsX == 1 && this.cellsY == 1 &&
+                (cellsX != 1 || cellsY != 1)) {
+
+            this.cellsX = cellsX;
+            this.cellsY = cellsY;
+            this.cellWidth = (this.finishX - this.startX) / this.cellsX;
+            this.cellHeight  = (this.finishY - this.startY) / this.cellsY;
+
+            this.initializeChildren();
+        }
     }
 
     public Integer getCellsY() {
         return cellsY;
-    }
-
-    public void setCellsY(Integer cellsY) {
-        this.cellsY = cellsY;
-        this.cellHeight  = (this.finishY-this.startY) / this.cellsY;
     }
 
     public Double getCellWidth() {
@@ -110,6 +108,14 @@ public class CellularArea {
 
     public Double getCellHeight() {
         return cellHeight;
+    }
+
+    public List<Integer> getId() {
+        return id;
+    }
+
+    public List<CellularArea> getChildren() {
+        return children;
     }
 
     private boolean checkDotBounds(Double x, Double y) {
@@ -147,6 +153,28 @@ public class CellularArea {
         return new Pair<Integer, Integer>(i, j);
     }
 
+    private void initializeChildren() {
+
+        for (int j = 0; j < this.cellsY; j++) {
+            for (int i = 0; i < this.cellsX; i++) {
+
+                Double childStartX = this.startX + i*this.cellWidth;
+                Double childStartY = this.startY + (cellsY-j-1)*this.cellHeight;
+
+                Double childFinishX = this.finishX + (i+1)*this.cellWidth;
+                Double childFinishY = this.finishY + (cellsY-j)*this.cellHeight;
+
+                List<Integer> childId = new ArrayList<>(this.id);
+                childId.add(j*this.cellsX+i);
+
+                CellularArea child = new CellularArea(childStartX, childStartY,
+                                                        childFinishX, childFinishY,
+                                                        1, 1, childId);
+                this.children.add(child);
+            }
+        }
+    }
+
     /**
      *  Gets the cell number
      *  (counting up to down and left to right), i.e.
@@ -177,4 +205,6 @@ public class CellularArea {
 
         return (this.cellsY - 1 - j)*this.cellsX + i;
     }
+
+
 }

@@ -1,5 +1,6 @@
 package sample;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
 
@@ -152,7 +153,7 @@ public class GUI {
 //                    series.getData().add(new XYChart.Data(dot.getKey(), dot.getValue()));
 //                }
 
-                CellularArea cArea = new CellularArea(-2.0, -1.0, 1.0, 4.0, 3, 5);
+                CellularArea cArea = new CellularArea(-2.0, -1.0, 3.0, 3.0, 5, 4, new ArrayList<>());
 
                 System.out.println("(-1.5; -2.5) in " + cArea.getCellNumber(-1.5, -2.5));
                 System.out.println("(-2.1; 1.2) in " + cArea.getCellNumber(-2.1, 1.2));
