@@ -2,6 +2,8 @@ package sample;
 
 import java.util.*;
 import javafx.util.Pair;
+import org.mariuszgromada.math.mxparser.Argument;
+import org.mariuszgromada.math.mxparser.Expression;
 import static java.lang.Math.floor;
 import static java.lang.Math.random;
 
@@ -88,6 +90,7 @@ public class CellularArea {
 
     // actually, method can be invoked
     // only when this cell w/o children
+    // TODO make a check OR modify CellularArea.initializeChildren for overwriting 'children' list
     public void setCellsXY(Integer cellsX, Integer cellsY) {
 
         if (this.cellsX == 1 && this.cellsY == 1 &&
@@ -131,38 +134,13 @@ public class CellularArea {
     }
 
     private boolean checkDotBounds(Double x, Double y) {
+
         if (x < this.startX || x > this.finishX ||
             y < this.startY || y > this.finishY)
 
             return false;
 
         return true;
-    }
-
-    /**
-     *  Gets the (i,j) pair
-     *  of cell indices (counting according to x,y growth), i.e.
-     *
-     *  ________________
-     *  |    |    |    |
-     *  |0, 1|1, 1|2, 1|
-     *  |____|____|____|
-     *  |    |    |    |
-     *  |0, 0|1, 0|2, 0|
-     *  |____|____|____|
-     *
-     *  for specified dot.
-     *
-     */
-
-    public Pair<Integer, Integer> getDotCell(Double x, Double y) {
-
-        if (!checkDotBounds(x, y)) { return new Pair<Integer, Integer>(-1, -1); }
-
-        Integer i = (int) floor((x - this.startX) / cellWidth);
-        Integer j = (int) floor((y - this.startY) / cellHeight);
-
-        return new Pair<Integer, Integer>(i, j);
     }
 
     private void initializeChildren() {
@@ -202,23 +180,58 @@ public class CellularArea {
      *  |  3 |  4 |  5 |
      *  |____|____|____|
      *
-     *  for specified pair of indices got from getDotCell().
+     *  for specified dot.
      *
      */
-
-    public Integer getCellNumber(Pair<Integer, Integer> indices) {
-
-        return (this.cellsY - 1 - indices.getValue())*this.cellsX + indices.getKey();
-    }
-
     public Integer getCellNumber(Double x, Double y) {
 
-        if (!checkDotBounds(x, y)) { return -1; }
+        if (!checkDotBounds(x, y)) {
+
+            System.err.println("Warning: CellularArea.getCellNumber given dot is out of bounds");
+            return -1;
+        }
 
         Integer i = (int) floor((x - this.startX) / cellWidth);
         Integer j = (int) floor((y - this.startY) / cellHeight);
 
         return (this.cellsY - 1 - j)*this.cellsX + i;
+    }
+
+    public CellularArea getCellById(List<Integer> id) {
+
+        CellularArea parent = this;
+
+        for (int i = 0; i < id.size(); i++) {
+
+            if (parent.getChildren().isEmpty()) {
+
+                if (i < id.size()-1) {
+                    System.err.println("Warning: CellularArea.getCellById reached end of fragmentation but id is not over");
+                }
+
+                return parent;
+            }
+
+            parent = parent.getChildren().get(id.get(i));
+        }
+
+        // TODO remove?
+        return parent;
+    }
+
+    /**
+     * Note: this method returns appropriate CellularArea
+     * even if that cell is DISCARDED. You should check that
+     * case in the wrapping methods.
+     */
+    public CellularArea getCellByDot(Double x, Double y) {
+
+        if (this.getChildren().isEmpty()) {
+            return this;
+        }
+
+        CellularArea child = this.getChildren().get(this.getCellNumber(x, y));
+        return child.getCellByDot(x, y);
     }
 
 
@@ -238,21 +251,17 @@ public class CellularArea {
             return;
         }
 
+        // even if we have terminate DISCARDED cell as 'this',
+        // it won't fragment further because of absence of children
         for (CellularArea each : this.children) { each.doFragmentation(cg); }
-
-        //for (CellularArea each : this.children) {
-
-        //    System.out.println(each);
-        //}
     }
 
     /**
      *
      * @param amount how many points it will get
-     * @param delta value of extension of this area
      * @param generalList modifiable list forming general sequence
      */
-    public void getRandomPoints(Integer amount, Double delta,
+    public void getRandomPoints(Integer amount,
                                 List<Pair<Double, Double>> generalList) {
 
         if (this.children.isEmpty() && this.getStatus() == CellStatus.ACTIVE) {
@@ -260,8 +269,6 @@ public class CellularArea {
             List<Pair<Double, Double>> areaDots = new ArrayList<>();
             Double areaWidth = this.finishX - this.startX;
             Double areaHeight = this.finishY - this.startY;
-
-            //System.out.println("Generating dots for " + this.getId().toString() + "...");
 
             for (Integer i = 0; i < amount; i++) {
 
@@ -276,14 +283,98 @@ public class CellularArea {
             return;
         }
 
-        for (CellularArea each : this.children) { each.getRandomPoints(amount, delta, generalList); }
+        for (CellularArea each : this.children) { each.getRandomPoints(amount, generalList); }
+    }
+
+    /**
+     *
+     * @param amount how many points it will get
+     * @param generalList modifiable list forming general sequence
+     * @param deltaPercent percentage of extension of this area
+     */
+    public void getRandomPoints(Integer amount,
+                                List<Pair<Double, Double>> generalList,
+                                Double deltaPercent) {
+
+        if (this.children.isEmpty() && this.getStatus() == CellStatus.ACTIVE) {
+
+            List<Pair<Double, Double>> areaDots = new ArrayList<>();
+            Double areaWidth = this.finishX - this.startX;
+            Double areaHeight = this.finishY - this.startY;
+            Double deltaX = areaWidth * deltaPercent;
+            Double deltaY = areaHeight * deltaPercent;
+
+            for (Integer i = 0; i < amount; i++) {
+
+                Double randX = (this.startX - deltaX) + random() * (areaWidth + 2*deltaX);
+                Double randY = (this.startY - deltaY) + random() * (areaHeight + 2*deltaY);
+                Pair<Double, Double> dot = new Pair<Double, Double>(randX, randY);
+
+                areaDots.add(dot);
+            }
+
+            generalList.addAll(areaDots);
+            return;
+        }
+
+        for (CellularArea each : this.children) { each.getRandomPoints(amount, generalList, deltaPercent); }
     }
 
     public List<Pair<Double, Double>> getActiveArea() {
 
         List<Pair<Double, Double>> result = new ArrayList<>();
 
-        this.getRandomPoints(200, 0.0, result);
+        this.getRandomPoints(100, result);
         return result;
+    }
+
+    public void fillSymbolicImage(ComponentGraph cg,
+                                    Expression eF,
+                                    Expression eG) {
+
+        Argument xArg = new Argument("x", 0.0);
+        Argument yArg = new Argument("y", 0.0);
+
+        eF.addArguments(xArg, yArg);
+        eG.addArguments(xArg, yArg);
+
+        for (List<Integer> id : cg.getNodes().keySet()) {
+
+            CellularArea cArea = this.getCellById(id);
+            ComponentGraph.Node node = cg.getNodes().get(id);
+            HashSet<ComponentGraph.Node> adjacentNodes = new HashSet<>();
+            List<Pair<Double, Double>> cellDots = new ArrayList<>();
+
+            cArea.getRandomPoints(50, cellDots);
+
+            for (Pair<Double, Double> dot : cellDots) {
+
+                xArg.setArgumentValue(dot.getKey());
+                yArg.setArgumentValue(dot.getValue());
+
+                Double newX = eF.calculate();
+                Double newY = eG.calculate();
+
+                // in this case we do not registrating such link in graph
+                if (!this.checkDotBounds(newX, newY)) { break; }
+
+                // 'remoteCell' = cell which contains mapped dot
+                CellularArea remoteCell = this.getCellByDot(newX, newY);
+
+                if (remoteCell.getStatus() == CellStatus.DISCARDED) { break; }
+
+                ComponentGraph.Node remoteNode = cg.getNodes().get(remoteCell.getId());
+                adjacentNodes.add(remoteNode);
+            }
+
+            cg.getLinks().get(node).addAll(adjacentNodes);
+        }
+    }
+
+    public void markAsDiscarded(Set<ComponentGraph.Node> nodes) {
+
+        for (ComponentGraph.Node node : nodes) {
+            this.getCellById(node.content).setStatus(CellStatus.DISCARDED);
+        }
     }
 }

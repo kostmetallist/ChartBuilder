@@ -18,6 +18,18 @@ public class ComponentGraph {
         }
     }
 
+    // graph internal data
+    // TODO maybe introduce LinkedHashMap to 'nodes' (due to predictable iteration order)
+    HashMap<List<Integer>, Node> nodes = new HashMap<>();
+    HashMap<Node, List<Node>>    links = new HashMap<>();
+
+    private int index = 0;
+
+    private ArrayDeque<Node> visited = new ArrayDeque<>();
+    private HashSet<List<Integer>> stack = new HashSet<>();
+    private HashSet<Node> sccElements = new HashSet<>();
+
+
     // service method
     public Node createNode(List<Integer> content) {
         return new Node(content);
@@ -26,29 +38,23 @@ public class ComponentGraph {
     public void addNode(Node node) {
 
         this.nodes.put(node.content, node);
-        this.graph.put(node, new ArrayList<>());
+        this.links.put(node, new ArrayList<>());
     }
 
     public void addLink(Node from, Node to) {
-        this.graph.get(from).add(to);
+        this.links.get(from).add(to);
     }
 
-    // graph internal data
-    HashMap<List<Integer>, Node> nodes = new HashMap<>();
-    HashMap<Node, List<Node>>    graph = new HashMap<>();
+    public HashMap<List<Integer>, Node> getNodes() {
+        return this.nodes;
+    }
 
-    private int index = 0;
-
-    // for a DFS
-    private ArrayDeque<Node> visited = new ArrayDeque<>();
-    private HashSet<List<Integer>> stack = new HashSet<>();
-
-    // stores strongly connected components
-    // from the algorithm pass
-    private HashSet<HashSet<Node>> scc = new HashSet<>();
+    public HashMap<Node, List<Node>> getLinks() {
+        return this.links;
+    }
 
     // returns set of scc
-    public HashSet<HashSet<Node>> tarjan() {
+    public HashSet<Node> tarjan() {
 
         for (Node n : nodes.values()) {
             if (n != null && n.index == -1) {
@@ -56,7 +62,7 @@ public class ComponentGraph {
             }
         }
 
-        return scc;
+        return sccElements;
     }
 
     private void strongConnect(Node node) {
@@ -68,7 +74,7 @@ public class ComponentGraph {
         visited.push(node);
         stack.add(node.content);
 
-        List<Node> neighbours = graph.get(node);
+        List<Node> neighbours = links.get(node);
 
         if (neighbours != null) {
 
@@ -87,21 +93,30 @@ public class ComponentGraph {
 
         if (node.lowLink == node.index) {
 
-            HashSet<Node> cycle = new HashSet<>();
-
             while (true) {
 
                 Node p = visited.pop();
                 stack.remove(p.content);
-                cycle.add(p);
+                sccElements.add(p);
 
                 if (p == node) {
                     break;
                 }
             }
-            if (cycle.size() > 1) {
-                scc.add(cycle);
-            }
         }
+    }
+
+    // be sure that sccElements is filled,
+    // otherwise method call will be useless
+    public Set<Node> detectIsolated() {
+
+        Set<Node> isolated = new HashSet<>();
+
+        for (Node node : links.keySet()) {
+
+            if (!sccElements.contains(node)) { isolated.add(node); }
+        }
+
+        return isolated;
     }
 }

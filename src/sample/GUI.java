@@ -169,11 +169,11 @@ public class GUI {
                                                     3.0, 3.0,
                                                     5, 4, new ArrayList<>());
 
-                cArea.getChildren().get(6).setStatus(CellularArea.CellStatus.DISCARDED);
-                cArea.getChildren().get(12).setStatus(CellularArea.CellStatus.DISCARDED);
-                cArea.getChildren().get(18).setStatus(CellularArea.CellStatus.DISCARDED);
+//                cArea.getChildren().get(6).setStatus(CellularArea.CellStatus.DISCARDED);
+//                cArea.getChildren().get(12).setStatus(CellularArea.CellStatus.DISCARDED);
+//                cArea.getChildren().get(18).setStatus(CellularArea.CellStatus.DISCARDED);
 
-                List<Pair<Double, Double>> data = logic.crBuilder("x+y", cArea, 1);
+                List<Pair<Double, Double>> data = logic.crBuilder("1+y-1.4*x*x", "0.3*x", cArea, 1);
 
                 for (Iterator<Pair<Double, Double>> iter = data.iterator(); iter.hasNext(); ) {
 
