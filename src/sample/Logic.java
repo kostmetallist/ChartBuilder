@@ -146,4 +146,36 @@ public class Logic {
 
         return result;
     }
+
+
+    public List<Pair<Double, Double>> crBuilder(String mapping,
+                                                CellularArea initArea,
+                                                Integer fragDepth) {
+
+        Argument xArg = new Argument("x", 0.0);
+        Argument yArg = new Argument("y", 0.0);
+        Expression expr = new Expression(mapping, xArg, yArg);
+
+        for (Integer i = 0; i < fragDepth; i++) {
+
+            ComponentGraph cg = new ComponentGraph();
+
+            // TODO maybe compose this methods into one
+            initArea.doFragmentation(cg);
+
+            /*
+            initArea.fillSymbolicImage(cg, expr);
+
+            HashSet<HashSet<ComponentGraph.Node>> scComponents = cg.tarjan();
+            HashSet<List<Integer>> idsToDiscard = cg.discardIsolated(scComponents);
+
+            initArea.markAsDiscarded(idsToDiscard);
+            */
+        }
+
+        //List<Pair<Double, Double>> result = initArea.getActualArea();
+        List<Pair<Double, Double>> result = new ArrayList<>();
+
+        return result;
+    }
 }

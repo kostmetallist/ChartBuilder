@@ -6,6 +6,8 @@ import static java.lang.Math.floor;
 
 public class CellularArea {
 
+    public enum CellStatus { NORMAL, DISCARDED }
+
     private Double startX;
     private Double startY;
 
@@ -18,6 +20,7 @@ public class CellularArea {
     private Double cellWidth;
     private Double cellHeight;
 
+    private CellStatus status = CellStatus.NORMAL;
     private List<Integer> id = new ArrayList<>();
     private List<CellularArea> children = new ArrayList<>();
 
@@ -108,6 +111,14 @@ public class CellularArea {
 
     public Double getCellHeight() {
         return cellHeight;
+    }
+
+    public CellStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CellStatus status) {
+        this.status = status;
     }
 
     public List<Integer> getId() {
@@ -207,4 +218,20 @@ public class CellularArea {
     }
 
 
+    public void doFragmentation(ComponentGraph cg) {
+
+        if (this.children.isEmpty()) {
+
+            setCellsXY(2, 2);
+            System.out.println("Fragments are ready for cell " + this.id.toString());
+            return;
+        }
+
+        for (CellularArea each : this.children) { each.doFragmentation(cg); }
+
+        //for (CellularArea each : this.children) {
+
+        //    System.out.println(each);
+        //}
+    }
 }

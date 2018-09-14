@@ -4,7 +4,7 @@ import java.util.*;
 
 public class ComponentGraph {
 
-    private class Node {
+    public class Node {
         // -1, -1, node is unvisited by default.
         public int index = -1, lowLink = -1;
         public List<Integer> content;
