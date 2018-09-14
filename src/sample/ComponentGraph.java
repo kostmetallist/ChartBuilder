@@ -23,6 +23,16 @@ public class ComponentGraph {
         return new Node(content);
     }
 
+    public void addNode(Node node) {
+
+        this.nodes.put(node.content, node);
+        this.graph.put(node, new ArrayList<>());
+    }
+
+    public void addLink(Node from, Node to) {
+        this.graph.get(from).add(to);
+    }
+
     // graph internal data
     HashMap<List<Integer>, Node> nodes = new HashMap<>();
     HashMap<Node, List<Node>>    graph = new HashMap<>();

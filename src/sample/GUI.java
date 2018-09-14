@@ -156,7 +156,6 @@ public class GUI {
 
 
 
-
 //                CellularArea cArea = new CellularArea(-2.0, -1.0, 3.0, 3.0, 5, 4, new ArrayList<>());
 //
 //                System.out.println("(-1.5; -2.5) in " + cArea.getCellNumber(-1.5, -2.5));
@@ -164,12 +163,23 @@ public class GUI {
 //                System.out.println("(0.5; 0.5) in " + cArea.getCellNumber(0.5, 0.5));
 
 
+                series.getData().clear();
 
                 CellularArea cArea = new CellularArea(-2.0, -1.0,
-                                                    3.0, 4.0,
+                                                    3.0, 3.0,
                                                     5, 4, new ArrayList<>());
 
-                logic.crBuilder("x+y", cArea, 2);
+                cArea.getChildren().get(6).setStatus(CellularArea.CellStatus.DISCARDED);
+                cArea.getChildren().get(12).setStatus(CellularArea.CellStatus.DISCARDED);
+                cArea.getChildren().get(18).setStatus(CellularArea.CellStatus.DISCARDED);
+
+                List<Pair<Double, Double>> data = logic.crBuilder("x+y", cArea, 1);
+
+                for (Iterator<Pair<Double, Double>> iter = data.iterator(); iter.hasNext(); ) {
+
+                    Pair<Double, Double> dot = iter.next();
+                    series.getData().add(new XYChart.Data(dot.getKey(), dot.getValue()));
+                }
             }
         });
 

@@ -3,10 +3,11 @@ package sample;
 import java.util.*;
 import javafx.util.Pair;
 import static java.lang.Math.floor;
+import static java.lang.Math.random;
 
 public class CellularArea {
 
-    public enum CellStatus { NORMAL, DISCARDED }
+    public enum CellStatus { ACTIVE, DISCARDED }
 
     private Double startX;
     private Double startY;
@@ -20,8 +21,8 @@ public class CellularArea {
     private Double cellWidth;
     private Double cellHeight;
 
-    private CellStatus status = CellStatus.NORMAL;
-    private List<Integer> id = new ArrayList<>();
+    private CellStatus status = CellStatus.ACTIVE;
+    private List<Integer> id;
     private List<CellularArea> children = new ArrayList<>();
 
 
@@ -172,8 +173,8 @@ public class CellularArea {
                 Double childStartX = this.startX + i*this.cellWidth;
                 Double childStartY = this.startY + (cellsY-j-1)*this.cellHeight;
 
-                Double childFinishX = this.finishX + (i+1)*this.cellWidth;
-                Double childFinishY = this.finishY + (cellsY-j)*this.cellHeight;
+                Double childFinishX = this.startX + (i+1)*this.cellWidth;
+                Double childFinishY = this.startY + (cellsY-j)*this.cellHeight;
 
                 List<Integer> childId = new ArrayList<>(this.id);
                 childId.add(j*this.cellsX+i);
@@ -182,6 +183,9 @@ public class CellularArea {
                                                         childFinishX, childFinishY,
                                                         1, 1, childId);
                 this.children.add(child);
+
+                //System.out.println("Child id " + child.getId().toString() + " bounds X: " + child.startX + " to " + child.finishX);
+                //System.out.println("             bounds Y: " + child.startY + " to " + child.finishY);
             }
         }
     }
@@ -220,10 +224,17 @@ public class CellularArea {
 
     public void doFragmentation(ComponentGraph cg) {
 
-        if (this.children.isEmpty()) {
+        if (this.children.isEmpty() && this.getStatus() == CellStatus.ACTIVE) {
 
             setCellsXY(2, 2);
-            System.out.println("Fragments are ready for cell " + this.id.toString());
+
+            for (CellularArea frag: this.children) {
+
+                ComponentGraph.Node node = cg.createNode(frag.getId());
+                cg.addNode(node);
+                System.out.println("New fragment " + frag.id.toString());
+            }
+
             return;
         }
 
@@ -233,5 +244,46 @@ public class CellularArea {
 
         //    System.out.println(each);
         //}
+    }
+
+    /**
+     *
+     * @param amount how many points it will get
+     * @param delta value of extension of this area
+     * @param generalList modifiable list forming general sequence
+     */
+    public void getRandomPoints(Integer amount, Double delta,
+                                List<Pair<Double, Double>> generalList) {
+
+        if (this.children.isEmpty() && this.getStatus() == CellStatus.ACTIVE) {
+
+            List<Pair<Double, Double>> areaDots = new ArrayList<>();
+            Double areaWidth = this.finishX - this.startX;
+            Double areaHeight = this.finishY - this.startY;
+
+            //System.out.println("Generating dots for " + this.getId().toString() + "...");
+
+            for (Integer i = 0; i < amount; i++) {
+
+                Double randX = this.startX + random() * areaWidth;
+                Double randY = this.startY + random() * areaHeight;
+                Pair<Double, Double> dot = new Pair<Double, Double>(randX, randY);
+
+                areaDots.add(dot);
+            }
+
+            generalList.addAll(areaDots);
+            return;
+        }
+
+        for (CellularArea each : this.children) { each.getRandomPoints(amount, delta, generalList); }
+    }
+
+    public List<Pair<Double, Double>> getActiveArea() {
+
+        List<Pair<Double, Double>> result = new ArrayList<>();
+
+        this.getRandomPoints(200, 0.0, result);
+        return result;
     }
 }

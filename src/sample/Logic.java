@@ -173,8 +173,7 @@ public class Logic {
             */
         }
 
-        //List<Pair<Double, Double>> result = initArea.getActualArea();
-        List<Pair<Double, Double>> result = new ArrayList<>();
+        List<Pair<Double, Double>> result = initArea.getActiveArea();
 
         return result;
     }
