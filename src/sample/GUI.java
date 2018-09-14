@@ -165,9 +165,9 @@ public class GUI {
 
                 series.getData().clear();
 
-                CellularArea cArea = new CellularArea(-2.0, -1.0,
-                                                    3.0, 3.0,
-                                                    5, 4, new ArrayList<>());
+                CellularArea cArea = new CellularArea(-1.5, -1.0,
+                                                    1.5, 1.0,
+                                                    30, 20, new ArrayList<>());
 
 //                cArea.getChildren().get(6).setStatus(CellularArea.CellStatus.DISCARDED);
 //                cArea.getChildren().get(12).setStatus(CellularArea.CellStatus.DISCARDED);

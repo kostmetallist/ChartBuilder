@@ -324,7 +324,7 @@ public class CellularArea {
 
         List<Pair<Double, Double>> result = new ArrayList<>();
 
-        this.getRandomPoints(100, result);
+        this.getRandomPoints(20, result);
         return result;
     }
 
@@ -345,7 +345,7 @@ public class CellularArea {
             HashSet<ComponentGraph.Node> adjacentNodes = new HashSet<>();
             List<Pair<Double, Double>> cellDots = new ArrayList<>();
 
-            cArea.getRandomPoints(50, cellDots);
+            cArea.getRandomPoints(100, cellDots);
 
             for (Pair<Double, Double> dot : cellDots) {
 

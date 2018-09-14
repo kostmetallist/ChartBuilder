@@ -93,14 +93,23 @@ public class ComponentGraph {
 
         if (node.lowLink == node.index) {
 
+            HashSet<Node> cycle = new HashSet<>();
+
             while (true) {
 
                 Node p = visited.pop();
                 stack.remove(p.content);
-                sccElements.add(p);
+                cycle.add(p);
 
                 if (p == node) {
                     break;
+                }
+            }
+
+            if (cycle.size() > 1) {
+
+                for (Node elem : cycle) {
+                    sccElements.add(elem);
                 }
             }
         }
@@ -117,6 +126,23 @@ public class ComponentGraph {
             if (!sccElements.contains(node)) { isolated.add(node); }
         }
 
+        System.out.println("ISOLATED:");
+        for (Node i : isolated) {
+            System.out.println(i.content.toString());
+        }
+
         return isolated;
+    }
+
+    public void printContent() {
+
+        for (Node node : links.keySet()) {
+
+            System.out.println(node.content.toString() + ":");
+
+            for (Node i : links.get(node)) {
+                System.out.println("  " + i.content.toString());
+            }
+        }
     }
 }

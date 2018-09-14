@@ -164,6 +164,8 @@ public class Logic {
             initArea.fillSymbolicImage(cg, eF, eG);
             cg.tarjan();
             initArea.markAsDiscarded(cg.detectIsolated());
+
+            cg.printContent();
         }
 
         List<Pair<Double, Double>> result = initArea.getActiveArea();
