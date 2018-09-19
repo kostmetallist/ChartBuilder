@@ -234,8 +234,19 @@ public class CellularArea {
         return child.getCellByDot(x, y);
     }
 
+    // cg must be root CellularArea
+    public void doInitialFragmentation(ComponentGraph cg) {
 
-    public void doFragmentation(ComponentGraph cg) {
+        for (CellularArea frag: this.children) {
+
+            ComponentGraph.Node node = cg.createNode(frag.getId());
+            cg.addNode(node);
+            System.out.println("New fragment " + frag.id.toString());
+        }
+    }
+
+
+    public void doRegularFragmentation(ComponentGraph cg) {
 
         if (this.children.isEmpty() && this.getStatus() == CellStatus.ACTIVE) {
 
@@ -253,7 +264,7 @@ public class CellularArea {
 
         // even if we have terminate DISCARDED cell as 'this',
         // it won't fragment further because of absence of children
-        for (CellularArea each : this.children) { each.doFragmentation(cg); }
+        for (CellularArea each : this.children) { each.doRegularFragmentation(cg); }
     }
 
     /**

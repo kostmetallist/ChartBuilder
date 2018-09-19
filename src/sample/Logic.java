@@ -153,6 +153,12 @@ public class Logic {
                                                 CellularArea initArea,
                                                 Integer fragDepth) {
 
+        if (fragDepth < 0) {
+
+            System.err.println("crBuilder: fragmentation depth must be 0+");
+            return new ArrayList<>();
+        }
+
         Expression eF = new Expression(f);
         Expression eG = new Expression(g);
         Argument xArg = new Argument("x", 0.0);
@@ -161,11 +167,19 @@ public class Logic {
         eF.addArguments(xArg, yArg);
         eG.addArguments(xArg, yArg);
 
+        ComponentGraph cgInit = new ComponentGraph();
+
+        initArea.doInitialFragmentation(cgInit);
+        initArea.fillSymbolicImage(cgInit, eF, eG);
+        cgInit.tarjan();
+        initArea.markAsDiscarded(cgInit.detectIsolated());
+        cgInit.printContent();
+
         for (Integer i = 0; i < fragDepth; i++) {
 
             ComponentGraph cg = new ComponentGraph();
 
-            initArea.doFragmentation(cg);
+            initArea.doRegularFragmentation(cg);
             initArea.fillSymbolicImage(cg, eF, eG);
             cg.tarjan();
             initArea.markAsDiscarded(cg.detectIsolated());

@@ -88,43 +88,36 @@ public class GUI {
 
         Label rungeDxdtLabel = new Label("dx/dt =  f(x, y, t) =");
         rungeGridPane.add(rungeDxdtLabel, 0,0);
-
         TextField rungeDxdtField = new TextField();
         rungeGridPane.add(rungeDxdtField, 1, 0);
 
         Label rungeDydtLabel = new Label("dy/dt = g(x, y, t) =");
         rungeGridPane.add(rungeDydtLabel, 0,1);
-
         TextField rungeDydtField = new TextField();
         rungeGridPane.add(rungeDydtField, 1, 1);
 
         Label rungeInitXLabel = new Label("Initial x0 =");
         rungeGridPane.add(rungeInitXLabel, 0, 2);
-
         TextField rungeInitXField = new TextField();
         rungeGridPane.add(rungeInitXField, 1, 2);
 
         Label rungeInitYLabel = new Label("Initial y0 =");
         rungeGridPane.add(rungeInitYLabel, 0, 3);
-
         TextField rungeInitYField = new TextField();
         rungeGridPane.add(rungeInitYField, 1, 3);
 
         Label rungeInitTLabel = new Label("Initial t0 =");
         rungeGridPane.add(rungeInitTLabel, 0, 4);
-
         TextField rungeInitTField = new TextField();
         rungeGridPane.add(rungeInitTField, 1, 4);
 
         Label rungeDeltaTLabel = new Label("Increment delta t =");
         rungeGridPane.add(rungeDeltaTLabel, 0, 5);
-
         TextField rungeDeltaTField = new TextField();
         rungeGridPane.add(rungeDeltaTField, 1, 5);
 
         Label rungeIterLabel = new Label("Number of iterations =");
         rungeGridPane.add(rungeIterLabel, 0, 6);
-
         TextField rungeIterField = new TextField();
         rungeGridPane.add(rungeIterField, 1, 6);
 
@@ -135,45 +128,16 @@ public class GUI {
 
             public void handle(ActionEvent event) {
 
-//                series.getData().clear();
-//
-//                InitialData initData = new InitialData(Double.parseDouble(rungeInitXField.getText()),
-//                                                        Double.parseDouble(rungeInitYField.getText()),
-//                                                        Double.parseDouble(rungeInitTField.getText()),
-//                                                        Double.parseDouble(rungeDeltaTField.getText()));
-//
-//                List<Pair<Double, Double>> data = logic.rungeKutter(rungeDxdtField.getText(),
-//                                                                    rungeDydtField.getText(),
-//                                                                    initData,
-//                                                                    Integer.parseInt(rungeIterField.getText()));
-//
-//                for (Iterator<Pair<Double, Double>> iter = data.iterator(); iter.hasNext(); ) {
-//
-//                    Pair<Double, Double> dot = iter.next();
-//                    series.getData().add(new XYChart.Data(dot.getKey(), dot.getValue()));
-//                }
-
-
-
-
-//                CellularArea cArea = new CellularArea(-2.0, -1.0, 3.0, 3.0, 5, 4, new ArrayList<>());
-//
-//                System.out.println("(-1.5; -2.5) in " + cArea.getCellNumber(-1.5, -2.5));
-//                System.out.println("(-2.1; 1.2) in " + cArea.getCellNumber(-2.1, 1.2));
-//                System.out.println("(0.5; 0.5) in " + cArea.getCellNumber(0.5, 0.5));
-
-
                 series.getData().clear();
+                InitialData initData = new InitialData(Double.parseDouble(rungeInitXField.getText()),
+                                                        Double.parseDouble(rungeInitYField.getText()),
+                                                        Double.parseDouble(rungeInitTField.getText()),
+                                                        Double.parseDouble(rungeDeltaTField.getText()));
 
-                CellularArea cArea = new CellularArea(-1.5, -1.0,
-                                                    1.5, 1.0,
-                                                    30, 20, new ArrayList<>());
-
-//                cArea.getChildren().get(6).setStatus(CellularArea.CellStatus.DISCARDED);
-//                cArea.getChildren().get(12).setStatus(CellularArea.CellStatus.DISCARDED);
-//                cArea.getChildren().get(18).setStatus(CellularArea.CellStatus.DISCARDED);
-
-                List<Pair<Double, Double>> data = logic.crBuilder("1+y-1.4*x*x", "0.3*x", cArea, 2);
+                List<Pair<Double, Double>> data = logic.rungeKutter(rungeDxdtField.getText(),
+                                                                    rungeDydtField.getText(),
+                                                                    initData,
+                                                                    Integer.parseInt(rungeIterField.getText()));
 
                 for (Iterator<Pair<Double, Double>> iter = data.iterator(); iter.hasNext(); ) {
 
@@ -198,43 +162,36 @@ public class GUI {
 
         Label eulerDxdtLabel = new Label("dx/dt =  f(x, y, t) =");
         eulerGridPane.add(eulerDxdtLabel, 0,0);
-
         TextField eulerDxdtField = new TextField();
         eulerGridPane.add(eulerDxdtField, 1, 0);
 
         Label eulerDydtLabel = new Label("dy/dt = g(x, y, t) =");
         eulerGridPane.add(eulerDydtLabel, 0,1);
-
         TextField eulerDydtField = new TextField();
         eulerGridPane.add(eulerDydtField, 1, 1);
 
         Label eulerInitXLabel = new Label("Initial x0 =");
         eulerGridPane.add(eulerInitXLabel, 0, 2);
-
         TextField eulerInitXField = new TextField();
         eulerGridPane.add(eulerInitXField, 1, 2);
 
         Label eulerInitYLabel = new Label("Initial y0 =");
         eulerGridPane.add(eulerInitYLabel, 0, 3);
-
         TextField eulerInitYField = new TextField();
         eulerGridPane.add(eulerInitYField, 1, 3);
 
         Label eulerInitTLabel = new Label("Initial t0 =");
         eulerGridPane.add(eulerInitTLabel, 0, 4);
-
         TextField eulerInitTField = new TextField();
         eulerGridPane.add(eulerInitTField, 1, 4);
 
         Label eulerDeltaTLabel = new Label("Increment delta t =");
         eulerGridPane.add(eulerDeltaTLabel, 0, 5);
-
         TextField eulerDeltaTField = new TextField();
         eulerGridPane.add(eulerDeltaTField, 1, 5);
 
         Label eulerIterLabel = new Label("Number of iterations =");
         eulerGridPane.add(eulerIterLabel, 0, 6);
-
         TextField eulerIterField = new TextField();
         eulerGridPane.add(eulerIterField, 1, 6);
 
@@ -244,6 +201,7 @@ public class GUI {
         eulerGoButton.setOnAction(new EventHandler<ActionEvent>() {
 
             public void handle(ActionEvent event) {
+
                 series.getData().clear();
                 InitialData initData = new InitialData(Double.parseDouble(eulerInitXField.getText()),
                         Double.parseDouble(eulerInitYField.getText()),
@@ -278,32 +236,27 @@ public class GUI {
 
         Label arbitXLabel = new Label("x is mapped to  f(x, y) =");
         arbitGridPane.add(arbitXLabel, 0,0);
-
-        TextField arbitXField = new TextField();
+        TextField arbitXField = new TextField("1 + y - 1.4*x*x");
         arbitGridPane.add(arbitXField, 1, 0);
 
         Label arbitYLabel = new Label("y is mapped to g(x, y) =");
         arbitGridPane.add(arbitYLabel, 0,1);
-
-        TextField arbitYField = new TextField();
+        TextField arbitYField = new TextField("0.3*x");
         arbitGridPane.add(arbitYField, 1, 1);
 
         Label arbitInitXLabel = new Label("Initial x0 =");
         arbitGridPane.add(arbitInitXLabel, 0, 2);
-
-        TextField arbitInitXField = new TextField();
+        TextField arbitInitXField = new TextField("0.0");
         arbitGridPane.add(arbitInitXField, 1, 2);
 
         Label arbitInitYLabel = new Label("Initial y0 =");
         arbitGridPane.add(arbitInitYLabel, 0, 3);
-
-        TextField arbitInitYField = new TextField();
+        TextField arbitInitYField = new TextField("0.0");
         arbitGridPane.add(arbitInitYField, 1, 3);
         
         Label arbitIterLabel = new Label("Number of iterations =");
         arbitGridPane.add(arbitIterLabel, 0, 4);
-
-        TextField arbitIterField = new TextField();
+        TextField arbitIterField = new TextField("5000");
         arbitGridPane.add(arbitIterField, 1, 4);
 
         Button arbitGoButton = new Button("Build");
@@ -338,8 +291,87 @@ public class GUI {
 
         //////////////////////////////
 
+        final GridPane crSetGridPane = new GridPane();
+
+        crSetGridPane.setAlignment(Pos.TOP_LEFT);
+        crSetGridPane.setHgap(5);
+        crSetGridPane.setVgap(10);
+        crSetGridPane.setPadding(new Insets(5, 5, 5, 5));
+
+        Label crSetXLabel = new Label("x is mapped to  f(x, y) =");
+        crSetGridPane.add(crSetXLabel, 0,0);
+        TextField crSetXField = new TextField("1 + y - 1.4*x*x");
+        crSetGridPane.add(crSetXField, 1, 0);
+
+        Label crSetYLabel = new Label("y is mapped to g(x, y) =");
+        crSetGridPane.add(crSetYLabel, 0,1);
+        TextField crSetYField = new TextField("0.3*x");
+        crSetGridPane.add(crSetYField, 1, 1);
+
+        Label crSetAreaXInitLabel = new Label("Area start  x =");
+        crSetGridPane.add(crSetAreaXInitLabel, 0, 2);
+        TextField crSetAreaXInitField = new TextField("-1.5");
+        crSetGridPane.add(crSetAreaXInitField, 1, 2);
+
+        Label crSetAreaYInitLabel = new Label("Area start  y =");
+        crSetGridPane.add(crSetAreaYInitLabel, 0, 3);
+        TextField crSetAreaYInitField = new TextField("-1.0");
+        crSetGridPane.add(crSetAreaYInitField, 1, 3);
+
+        Label crSetAreaXFinLabel = new Label("Area finish x =");
+        crSetGridPane.add(crSetAreaXFinLabel, 0, 4);
+        TextField crSetAreaXFinField = new TextField("1.5");
+        crSetGridPane.add(crSetAreaXFinField, 1, 4);
+
+        Label crSetAreaYFinLabel = new Label("Area finish y =");
+        crSetGridPane.add(crSetAreaYFinLabel, 0, 5);
+        TextField crSetAreaYFinField = new TextField("1.0");
+        crSetGridPane.add(crSetAreaYFinField, 1, 5);
+
+        Label crSetIterationsLabel = new Label("Fragmentation depth =");
+        crSetGridPane.add(crSetIterationsLabel, 0, 6);
+        TextField crSetIterationsField = new TextField("2");
+        crSetGridPane.add(crSetIterationsField, 1, 6);
+
+        // TODO adjust indices
+        Button crSetGoButton = new Button("Build");
+        crSetGridPane.add(crSetGoButton, 2, 7);
+
+        crSetGoButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            public void handle(ActionEvent event) {
+
+                series.getData().clear();
+
+                Double startX  = Double.parseDouble(crSetAreaXInitField.getText());
+                Double startY  = Double.parseDouble(crSetAreaYInitField.getText());
+                Double finishX = Double.parseDouble(crSetAreaXFinField.getText());
+                Double finishY = Double.parseDouble(crSetAreaYFinField.getText());
+
+                CellularArea cArea = new CellularArea(startX, startY,
+                                                        finishX, finishY,
+                                                    30, 20, new ArrayList<>());
+
+                List<Pair<Double, Double>> data = logic.crBuilder(crSetXField.getText(), crSetYField.getText(),
+                                                                    cArea,
+                                                                    Integer.parseInt(crSetIterationsField.getText()));
+
+                for (Iterator<Pair<Double, Double>> iter = data.iterator(); iter.hasNext(); ) {
+
+                    Pair<Double, Double> dot = iter.next();
+                    series.getData().add(new XYChart.Data(dot.getKey(), dot.getValue()));
+                }
+            }
+        });
+
+        Tab tabCrSet = new Tab();
+        tabCrSet.setText("CR-set");
+        tabCrSet.setContent(crSetGridPane);
+
+        //////////////////////////////
+
         tabPane.getSelectionModel().select(0);
-        tabPane.getTabs().addAll(tabRunge, tabEulerCurves, tabArbitMapping);
+        tabPane.getTabs().addAll(tabRunge, tabEulerCurves, tabArbitMapping, tabCrSet);
 
         root.getChildren().add(tabPane);
 
