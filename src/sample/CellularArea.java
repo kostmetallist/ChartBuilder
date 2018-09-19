@@ -332,11 +332,14 @@ public class CellularArea {
                                     Expression eF,
                                     Expression eG) {
 
-        Argument xArg = new Argument("x", 0.0);
-        Argument yArg = new Argument("y", 0.0);
+//        Argument xArg = new Argument("x", 0.0);
+//        Argument yArg = new Argument("y", 0.0);
+//
+//        eF.addArguments(xArg, yArg);
+//        eG.addArguments(xArg, yArg);
 
-        eF.addArguments(xArg, yArg);
-        eG.addArguments(xArg, yArg);
+        Argument xArg = eF.getArgument("x");
+        Argument yArg = eG.getArgument("y");
 
         for (List<Integer> id : cg.getNodes().keySet()) {
 

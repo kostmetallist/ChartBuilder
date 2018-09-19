@@ -155,6 +155,11 @@ public class Logic {
 
         Expression eF = new Expression(f);
         Expression eG = new Expression(g);
+        Argument xArg = new Argument("x", 0.0);
+        Argument yArg = new Argument("y", 0.0);
+
+        eF.addArguments(xArg, yArg);
+        eG.addArguments(xArg, yArg);
 
         for (Integer i = 0; i < fragDepth; i++) {
 
