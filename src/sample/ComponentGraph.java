@@ -126,23 +126,26 @@ public class ComponentGraph {
             if (!sccElements.contains(node)) { isolated.add(node); }
         }
 
-        System.out.println("ISOLATED:");
-        for (Node i : isolated) {
-            System.out.println(i.content.toString());
-        }
+//        System.out.println("ISOLATED:");
+//        for (Node i : isolated) {
+//            System.out.println(i.content.toString());
+//        }
 
+        System.out.println("Detected " + isolated.size() + " non-return nodes");
         return isolated;
     }
 
     public void printContent() {
 
-        for (Node node : links.keySet()) {
+//        for (Node node : links.keySet()) {
+//
+//            System.out.println(node.content.toString() + ":");
+//
+//            for (Node i : links.get(node)) {
+//                System.out.println("  " + i.content.toString());
+//            }
+//        }
 
-            System.out.println(node.content.toString() + ":");
-
-            for (Node i : links.get(node)) {
-                System.out.println("  " + i.content.toString());
-            }
-        }
+        System.out.println("Overall graph vertices number: " + links.keySet().size());
     }
 }

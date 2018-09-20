@@ -352,9 +352,13 @@ public class GUI {
                                                         finishX, finishY,
                                                     30, 20, new ArrayList<>());
 
+                // recording calculation time from here
+                long startTime = System.nanoTime();
                 List<Pair<Double, Double>> data = logic.crBuilder(crSetXField.getText(), crSetYField.getText(),
                                                                     cArea,
                                                                     Integer.parseInt(crSetIterationsField.getText()));
+                long endTime = System.nanoTime();
+                System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
 
                 for (Iterator<Pair<Double, Double>> iter = data.iterator(); iter.hasNext(); ) {
 
