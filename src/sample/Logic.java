@@ -171,8 +171,7 @@ public class Logic {
 
         initArea.doInitialFragmentation(cgInit);
         initArea.fillSymbolicImage(cgInit, eF, eG);
-        cgInit.tarjan();
-        initArea.markAsDiscarded(cgInit.detectIsolated());
+        initArea.markAsDiscarded(cgInit.tarjan());
         cgInit.printContent();
 
         for (Integer i = 0; i < fragDepth; i++) {
@@ -181,8 +180,7 @@ public class Logic {
 
             initArea.doRegularFragmentation(cg);
             initArea.fillSymbolicImage(cg, eF, eG);
-            cg.tarjan();
-            initArea.markAsDiscarded(cg.detectIsolated());
+            initArea.markAsDiscarded(cg.tarjan());
             cg.printContent();
         }
 

@@ -5,8 +5,10 @@ import java.util.*;
 public class ComponentGraph {
 
     public class Node {
-        // -1, -1, node is unvisited by default.
-        public int index = -1, lowLink = -1;
+        // index and lowLink for tarjan -- node is unvisited by default;
+        // id represents some additional info about node, e.g. cluster index for which this node belongs,
+        // initial value -1 as default non-marked node.
+        public int index = -1, lowLink = -1, id = -1;
         public List<Integer> content;
 
         public Node(List<Integer> content) {
@@ -19,18 +21,19 @@ public class ComponentGraph {
     }
 
     // graph internal data
-    // TODO maybe introduce LinkedHashMap to 'nodes' (due to predictable iteration order)
-    HashMap<List<Integer>, Node> nodes = new HashMap<>();
+    HashMap<List<Integer>, Node> nodes = new LinkedHashMap<>();
     HashMap<Node, List<Node>>    links = new HashMap<>();
 
-    private int index = 0;
-
+    // tarjan related data
+    private int index = 0, clusterIndex = 0, sccN = 0;
     private ArrayDeque<Node> visited = new ArrayDeque<>();
     private HashSet<List<Integer>> stack = new HashSet<>();
-    private HashSet<Node> sccElements = new HashSet<>();
+
+    // contains scc clusters (until sccN) and transit (after sccM) nodes
+    private List<Set<Node>> concentratedNodes = new ArrayList<>();
 
 
-    // service method
+    // Node fabricating
     public Node createNode(List<Integer> content) {
         return new Node(content);
     }
@@ -41,6 +44,7 @@ public class ComponentGraph {
         this.links.put(node, new ArrayList<>());
     }
 
+    // TODO add addLinkAll()
     public void addLink(Node from, Node to) {
         this.links.get(from).add(to);
     }
@@ -53,16 +57,31 @@ public class ComponentGraph {
         return this.links;
     }
 
-    // returns set of scc
-    public HashSet<Node> tarjan() {
+    public int getSccNumber() { return this.sccN; }
 
-        for (Node n : nodes.values()) {
+    // returns set of transit nodes (not scc)
+    public Set<Node> tarjan() {
+
+        for (Node n : links.keySet()) {
             if (n != null && n.index == -1) {
                 strongConnect(n);
             }
         }
 
-        return sccElements;
+        Set<Node> transitNodes = new HashSet<>();
+        sccN = clusterIndex;
+
+        for (Node each : links.keySet()) {
+            // if it hasn't been marked with cluster id
+            if (each.id == -1) {
+
+                each.id = clusterIndex++;
+                concentratedNodes.add(new HashSet<>(Arrays.asList(each)));
+                transitNodes.add(each);
+            }
+        }
+
+        return transitNodes;
     }
 
     private void strongConnect(Node node) {
@@ -106,33 +125,18 @@ public class ComponentGraph {
                 }
             }
 
-            if (cycle.size() > 1) {
+            // second condition marks auto-looping nodes as SCCs too
+            if (cycle.size() > 1 ||
+                    links.get(node).contains(node)) {
 
                 for (Node elem : cycle) {
-                    sccElements.add(elem);
+                    elem.id = clusterIndex++;
                 }
+
+                concentratedNodes.add(cycle);
+                System.out.println("SCC detected with size " + cycle.size());
             }
         }
-    }
-
-    // be sure that sccElements is filled,
-    // otherwise method call will be useless
-    public Set<Node> detectIsolated() {
-
-        Set<Node> isolated = new HashSet<>();
-
-        for (Node node : links.keySet()) {
-
-            if (!sccElements.contains(node)) { isolated.add(node); }
-        }
-
-//        System.out.println("ISOLATED:");
-//        for (Node i : isolated) {
-//            System.out.println(i.content.toString());
-//        }
-
-        System.out.println("Detected " + isolated.size() + " non-return nodes");
-        return isolated;
     }
 
     public void printContent() {

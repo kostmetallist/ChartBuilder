@@ -343,12 +343,6 @@ public class CellularArea {
                                     Expression eF,
                                     Expression eG) {
 
-//        Argument xArg = new Argument("x", 0.0);
-//        Argument yArg = new Argument("y", 0.0);
-//
-//        eF.addArguments(xArg, yArg);
-//        eG.addArguments(xArg, yArg);
-
         Argument xArg = eF.getArgument("x");
         Argument yArg = eG.getArgument("y");
 
@@ -381,6 +375,7 @@ public class CellularArea {
                 adjacentNodes.add(remoteNode);
             }
 
+            // TODO call addLinkAll()
             cg.getLinks().get(node).addAll(adjacentNodes);
         }
     }
