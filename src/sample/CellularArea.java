@@ -25,6 +25,7 @@ public class CellularArea {
 
     private CellStatus status = CellStatus.ACTIVE;
     private List<Integer> id;
+    private short colour = 0;
     private List<CellularArea> children = new ArrayList<>();
 
 
@@ -128,6 +129,10 @@ public class CellularArea {
     public List<Integer> getId() {
         return id;
     }
+
+    public short getColour() { return colour; }
+
+    public void setColour(short colour) { this.colour = colour; }
 
     public List<CellularArea> getChildren() {
         return children;
@@ -297,46 +302,48 @@ public class CellularArea {
         for (CellularArea each : this.children) { each.getRandomPoints(amount, generalList); }
     }
 
-    /**
-     *
-     * @param amount how many points it will get
-     * @param generalList modifiable list forming general sequence
-     * @param deltaPercent percentage of extension of this area
-     */
-    public void getRandomPoints(Integer amount,
-                                List<Pair<Double, Double>> generalList,
-                                Double deltaPercent) {
+    public void getRandomColouredPoints(Integer amount,
+                                        List<Pair<Double, Double>> generalList,
+                                        List<Short> paletteList) {
 
         if (this.children.isEmpty() && this.getStatus() == CellStatus.ACTIVE) {
 
             List<Pair<Double, Double>> areaDots = new ArrayList<>();
             Double areaWidth = this.finishX - this.startX;
             Double areaHeight = this.finishY - this.startY;
-            Double deltaX = areaWidth * deltaPercent;
-            Double deltaY = areaHeight * deltaPercent;
 
             for (Integer i = 0; i < amount; i++) {
 
-                Double randX = (this.startX - deltaX) + random() * (areaWidth + 2*deltaX);
-                Double randY = (this.startY - deltaY) + random() * (areaHeight + 2*deltaY);
+                Double randX = this.startX + random() * areaWidth;
+                Double randY = this.startY + random() * areaHeight;
                 Pair<Double, Double> dot = new Pair<Double, Double>(randX, randY);
 
                 areaDots.add(dot);
             }
 
             generalList.addAll(areaDots);
+            paletteList.add(this.colour);
             return;
         }
 
-        for (CellularArea each : this.children) { each.getRandomPoints(amount, generalList, deltaPercent); }
+        for (CellularArea each : this.children) { each.getRandomColouredPoints(amount, generalList, paletteList); }
     }
 
-    public List<Pair<Double, Double>> getActiveArea() {
+    public List<Pair<Double, Double>> getActiveArea(int dotsByCell) {
 
         List<Pair<Double, Double>> result = new ArrayList<>();
 
-        this.getRandomPoints(20, result);
+        this.getRandomPoints(dotsByCell, result);
         return result;
+    }
+
+    public Pair<List<Pair<Double, Double>>, List<Short>> getActiveColouredArea(int dotsByCell) {
+
+        List<Pair<Double, Double>> result = new ArrayList<>();
+        List<Short> paletteList = new ArrayList<>();
+
+        this.getRandomColouredPoints(dotsByCell, result, paletteList);
+        return new Pair<>(result, paletteList);
     }
 
     public void fillSymbolicImage(ComponentGraph cg,
@@ -384,6 +391,20 @@ public class CellularArea {
 
         for (ComponentGraph.Node node : nodes) {
             this.getCellById(node.content).setStatus(CellStatus.DISCARDED);
+        }
+    }
+
+    // it is more robust than markAsDiscarded: also works with colours
+    public void markupEntireArea(ComponentGraph cg) {
+
+        short i = 0;
+
+        for (Set<ComponentGraph.Node> cluster : cg.getConcentratedNodes()) {
+            for (ComponentGraph.Node node : cluster) {
+                if (i > cg.getSccNumber()-1) { this.getCellById(node.content).setStatus(CellStatus.DISCARDED); }
+                else { this.getCellById(node.content).setColour(i); }
+            }
+            i++;
         }
     }
 }

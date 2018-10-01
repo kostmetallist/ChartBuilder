@@ -333,7 +333,9 @@ public class GUI {
         TextField crSetIterationsField = new TextField("2");
         crSetGridPane.add(crSetIterationsField, 1, 6);
 
-        // TODO adjust indices
+
+        // TODO checkbox for colouring option
+
         Button crSetGoButton = new Button("Build");
         crSetGridPane.add(crSetGoButton, 2, 7);
 
@@ -354,16 +356,39 @@ public class GUI {
 
                 // recording calculation time from here
                 long startTime = System.nanoTime();
-                List<Pair<Double, Double>> data = logic.crBuilder(crSetXField.getText(), crSetYField.getText(),
+                Pair<List<Pair<Double, Double>>, List<Short>> data = logic.crBuilder(crSetXField.getText(), crSetYField.getText(),
                                                                     cArea,
                                                                     Integer.parseInt(crSetIterationsField.getText()));
                 long endTime = System.nanoTime();
                 System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
 
-                for (Iterator<Pair<Double, Double>> iter = data.iterator(); iter.hasNext(); ) {
+                // TODO control dotsByCell value from here for multiplying paletteList indices
+
+                List<Pair<Double, Double>> dots = data.getKey();
+                List<Short> paletteList = data.getValue();
+                List<String> colours = new ArrayList<>();
+
+                colours.add("-fx-background-color: #0b1a33; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+                colours.add("-fx-background-color: #c90000; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+                colours.add("-fx-background-color: #ff6519; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+                colours.add("-fx-background-color: #ffd314; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+                colours.add("-fx-background-color: #9dff14; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+                colours.add("-fx-background-color: #14ff62; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+                colours.add("-fx-background-color: #14a8ff; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+                colours.add("-fx-background-color: #2714ff; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+                colours.add("-fx-background-color: #f714ff; -fx-background-radius: 1px ; -fx-padding: 1px ;");
+
+                int i = 0;
+
+                for (Iterator<Pair<Double, Double>> iter = dots.iterator(); iter.hasNext(); ) {
 
                     Pair<Double, Double> dot = iter.next();
-                    series.getData().add(new XYChart.Data(dot.getKey(), dot.getValue()));
+                    XYChart.Data chartElem = new XYChart.Data(dot.getKey(), dot.getValue());
+                    String style = colours.get(paletteList.get(i/15) % 9);
+
+                    series.getData().add(chartElem);
+                    chartElem.getNode().setStyle(style);
+                    i++;
                 }
             }
         });

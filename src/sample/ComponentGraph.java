@@ -57,6 +57,8 @@ public class ComponentGraph {
         return this.links;
     }
 
+    public List<Set<Node>> getConcentratedNodes() { return this.concentratedNodes; }
+
     public int getSccNumber() { return this.sccN; }
 
     // returns set of transit nodes (not scc)

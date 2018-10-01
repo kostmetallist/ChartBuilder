@@ -148,15 +148,15 @@ public class Logic {
     }
 
 
-    public List<Pair<Double, Double>> crBuilder(String f,
-                                                String g,
-                                                CellularArea initArea,
-                                                Integer fragDepth) {
+    public Pair<List<Pair<Double, Double>>, List<Short>> crBuilder(String f,
+                                                                    String g,
+                                                                    CellularArea initArea,
+                                                                    Integer fragDepth) {
 
         if (fragDepth < 0) {
 
             System.err.println("crBuilder: fragmentation depth must be 0+");
-            return new ArrayList<>();
+            return null;
         }
 
         Expression eF = new Expression(f);
@@ -167,11 +167,18 @@ public class Logic {
         eF.addArguments(xArg, yArg);
         eG.addArguments(xArg, yArg);
 
+
+        // TODO branching for colouring
+
         ComponentGraph cgInit = new ComponentGraph();
 
         initArea.doInitialFragmentation(cgInit);
         initArea.fillSymbolicImage(cgInit, eF, eG);
-        initArea.markAsDiscarded(cgInit.tarjan());
+
+        //initArea.markAsDiscarded(cgInit.tarjan());
+        cgInit.tarjan();
+        initArea.markupEntireArea(cgInit);
+
         cgInit.printContent();
 
         for (Integer i = 0; i < fragDepth; i++) {
@@ -180,12 +187,17 @@ public class Logic {
 
             initArea.doRegularFragmentation(cg);
             initArea.fillSymbolicImage(cg, eF, eG);
-            initArea.markAsDiscarded(cg.tarjan());
+
+            //initArea.markAsDiscarded(cg.tarjan());
+            cg.tarjan();
+            initArea.markupEntireArea(cg);
+
             cg.printContent();
         }
 
-        List<Pair<Double, Double>> result = initArea.getActiveArea();
+        //List<Pair<Double, Double>> result = initArea.getActiveArea(20);
+        //return result;
 
-        return result;
+        return initArea.getActiveColouredArea(15);
     }
 }
