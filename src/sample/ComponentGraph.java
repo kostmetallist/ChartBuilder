@@ -132,9 +132,10 @@ public class ComponentGraph {
                     links.get(node).contains(node)) {
 
                 for (Node elem : cycle) {
-                    elem.id = clusterIndex++;
+                    elem.id = clusterIndex;
                 }
 
+                clusterIndex++;
                 concentratedNodes.add(cycle);
                 System.out.println("SCC detected with size " + cycle.size());
             }

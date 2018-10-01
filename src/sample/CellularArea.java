@@ -399,6 +399,8 @@ public class CellularArea {
 
         short i = 0;
 
+        System.out.println("sccN: " + cg.getSccNumber());
+
         for (Set<ComponentGraph.Node> cluster : cg.getConcentratedNodes()) {
             for (ComponentGraph.Node node : cluster) {
                 if (i > cg.getSccNumber()-1) { this.getCellById(node.content).setStatus(CellStatus.DISCARDED); }
