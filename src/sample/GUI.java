@@ -21,17 +21,32 @@ import javafx.scene.layout.StackPane;
 
 import javafx.util.Pair;
 
-import com.github.javafx.charts.zooming.ZoomManager;
-
 
 public class GUI {
 
     private final XYChart.Series<Number, Number> series;
-    private ZoomManager<Number, Number> zm;
-    //private final ScatterChart<Number,Number> sc;
+    private List<String> colours;
 
     GUI() {
-        series = new XYChart.Series<>();
+        series  = new XYChart.Series<>();
+        colours = new ArrayList<>();
+
+        colours.add("-fx-background-color: #0b1a33;");
+        colours.add("-fx-background-color: #c90000;");
+        colours.add("-fx-background-color: #ff6519;");
+        colours.add("-fx-background-color: #ffd314;");
+        colours.add("-fx-background-color: #9dff14;");
+        colours.add("-fx-background-color: #14ff62;");
+        colours.add("-fx-background-color: #14a8ff;");
+        colours.add("-fx-background-color: #2714ff;");
+        colours.add("-fx-background-color: #f714ff;");
+        colours.add("-fx-background-color: #42f4d4;");
+        colours.add("-fx-background-color: #772dff;");
+        colours.add("-fx-background-color: #6d3c00;");
+        colours.add("-fx-background-color: #949946;");
+        colours.add("-fx-background-color: #00ff33;");
+        colours.add("-fx-background-color: #686868;");
+        colours.add("-fx-background-color: #600225;");
     }
 
     StackPane initializeChartArea() {
@@ -366,28 +381,18 @@ public class GUI {
 
                 List<Pair<Double, Double>> dots = data.getKey();
                 List<Short> paletteList = data.getValue();
-                List<String> colours = new ArrayList<>();
-
-                colours.add("-fx-background-color: #0b1a33; -fx-background-radius: 1px ; -fx-padding: 1px ;");
-                colours.add("-fx-background-color: #c90000; -fx-background-radius: 1px ; -fx-padding: 1px ;");
-                colours.add("-fx-background-color: #ff6519; -fx-background-radius: 1px ; -fx-padding: 1px ;");
-                colours.add("-fx-background-color: #ffd314; -fx-background-radius: 1px ; -fx-padding: 1px ;");
-                colours.add("-fx-background-color: #9dff14; -fx-background-radius: 1px ; -fx-padding: 1px ;");
-                colours.add("-fx-background-color: #14ff62; -fx-background-radius: 1px ; -fx-padding: 1px ;");
-                colours.add("-fx-background-color: #14a8ff; -fx-background-radius: 1px ; -fx-padding: 1px ;");
-                colours.add("-fx-background-color: #2714ff; -fx-background-radius: 1px ; -fx-padding: 1px ;");
-                colours.add("-fx-background-color: #f714ff; -fx-background-radius: 1px ; -fx-padding: 1px ;");
 
                 int i = 0;
+                String nodeStyle = new String("-fx-background-radius: 1px ; -fx-padding: 1px ; ");
 
                 for (Iterator<Pair<Double, Double>> iter = dots.iterator(); iter.hasNext(); ) {
 
                     Pair<Double, Double> dot = iter.next();
                     XYChart.Data chartElem = new XYChart.Data(dot.getKey(), dot.getValue());
-                    String style = colours.get(paletteList.get(i/15) % 9);
+                    String colour = colours.get(paletteList.get(i/15) % colours.size());
 
                     series.getData().add(chartElem);
-                    chartElem.getNode().setStyle(style);
+                    chartElem.getNode().setStyle(nodeStyle + colour);
                     i++;
                 }
             }

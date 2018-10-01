@@ -32,6 +32,10 @@ public class ComponentGraph {
     // contains scc clusters (until sccN) and transit (after sccM) nodes
     private List<Set<Node>> concentratedNodes = new ArrayList<>();
 
+    // topological sorting data
+    private Stack<Node>  greyNodes = new Stack<>();
+    private List<Node> blackListed = new ArrayList<>();
+
 
     // Node fabricating
     public Node createNode(List<Integer> content) {
@@ -140,6 +144,86 @@ public class ComponentGraph {
                 System.out.println("SCC detected with size " + cycle.size());
             }
         }
+    }
+
+    // creates graph where each node corresponds to cluster in concentratedNodes of graph-caller
+    public ComponentGraph createConcentratedGraph() {
+
+        // newContentsStorage is for accelerating search by lists as elements of Map.keyset()
+        List<List<Integer>> newContentsStorage = new ArrayList<>();
+        ComponentGraph newGraph = new ComponentGraph();
+        int i = 0;
+
+        for (Set<Node> cluster : concentratedNodes) {
+
+            // node in new graph contains index of corresponding cluster as content and as id
+            List<Integer> newContent = new ArrayList<>(Arrays.asList(i));
+            Node newNode = createNode(newContent);
+
+            newContentsStorage.add(newContent);
+            newNode.id = i;
+            newGraph.addNode(newNode);
+            i++;
+        }
+
+        i = 0;
+
+        for (Set<Node> cluster : concentratedNodes) {
+
+            Set<Node> newLinks = new HashSet<>();
+            Set<Node> clusterLinks = new HashSet<>();
+            Node nodeFrom = newGraph.nodes.get(newContentsStorage.get(i));
+
+            // filling the set for all ways from cluster
+            for (Node node : cluster) {
+                clusterLinks.addAll(links.get(node));
+            }
+
+            // we can be sure that node.id equals to concentratedNodes index of that cluster id
+            for (Node node : clusterLinks) {
+
+                int id = node.id;
+                Node nodeTo = newGraph.nodes.get(newContentsStorage.get(id));
+
+                // we must not register auto-loops for further correct sortNodes() work
+                if (nodeTo != nodeFrom)
+                    newLinks.add(nodeTo);
+            }
+
+            newGraph.links.put(nodeFrom, new ArrayList<>(newLinks));
+            i++;
+        }
+
+        return newGraph;
+    }
+
+    public void dfs(Node node) {
+
+        greyNodes.push(node);
+        List<Node> adjacencies = links.get(node);
+
+        for (Node neighbour : adjacencies) {
+
+            //System.out.println("  ngbr " + neighbour.content);
+            if (!blackListed.contains(neighbour))
+                dfs(neighbour);
+        }
+
+        blackListed.add(greyNodes.pop());
+    }
+
+    public List<Node> sortNodes() {
+
+        for (Node from : links.keySet()) {
+
+            //System.out.println("from " + from.content);
+            if (blackListed.contains(from))
+                continue;
+
+            dfs(from);
+        }
+
+        return this.blackListed;
     }
 
     public void printContent() {

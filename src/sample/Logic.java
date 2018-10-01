@@ -193,6 +193,23 @@ public class Logic {
             initArea.markupEntireArea(cg);
 
             cg.printContent();
+
+            if (i == fragDepth-1) {
+
+                ComponentGraph subGraph = cg.createConcentratedGraph();
+                System.out.println("Concentrated: ");
+                subGraph.printContent();
+                List<ComponentGraph.Node> sortedReversed = subGraph.sortNodes();
+                List<Integer> orderList = new ArrayList<>();
+
+                for (ComponentGraph.Node node : sortedReversed) {
+                    if (node.id < cg.getSccNumber())
+                        orderList.add(0, node.id);
+                }
+
+                System.out.println("Order of SCC: ");
+                for (Integer each : orderList) { System.out.println(each); }
+            }
         }
 
         //List<Pair<Double, Double>> result = initArea.getActiveArea(20);
