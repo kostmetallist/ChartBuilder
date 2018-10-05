@@ -12,6 +12,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tab;
@@ -348,8 +349,9 @@ public class GUI {
         TextField crSetIterationsField = new TextField("2");
         crSetGridPane.add(crSetIterationsField, 1, 6);
 
-
-        // TODO checkbox for colouring option
+        CheckBox topSortCheckBox = new CheckBox("TopSort");
+        topSortCheckBox.setSelected(false);
+        crSetGridPane.add(topSortCheckBox, 0, 7);
 
         Button crSetGoButton = new Button("Build");
         crSetGridPane.add(crSetGoButton, 2, 7);
@@ -369,31 +371,53 @@ public class GUI {
                                                         finishX, finishY,
                                                     30, 20, new ArrayList<>());
 
-                // recording calculation time from here
-                long startTime = System.nanoTime();
-                Pair<List<Pair<Double, Double>>, List<Short>> data = logic.crBuilder(crSetXField.getText(), crSetYField.getText(),
-                                                                    cArea,
-                                                                    Integer.parseInt(crSetIterationsField.getText()));
-                long endTime = System.nanoTime();
-                System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
+                long startTime, endTime;
 
-                // TODO control dotsByCell value from here for multiplying paletteList indices
+                if (topSortCheckBox.isSelected()) {
 
-                List<Pair<Double, Double>> dots = data.getKey();
-                List<Short> paletteList = data.getValue();
+                    // recording calculation time from here
+                    startTime = System.nanoTime();
 
-                int i = 0;
-                String nodeStyle = new String("-fx-background-radius: 1px ; -fx-padding: 1px ; ");
+                    int dotsByCell = 15;
+                    Pair<List<Pair<Double, Double>>, List<Short>> data =
+                            logic.crBuilderTopSort(crSetXField.getText(), crSetYField.getText(),
+                                                cArea, Integer.parseInt(crSetIterationsField.getText()), dotsByCell);
+                    endTime = System.nanoTime();
+                    System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
 
-                for (Iterator<Pair<Double, Double>> iter = dots.iterator(); iter.hasNext(); ) {
+                    List<Pair<Double, Double>> dots = data.getKey();
+                    List<Short> paletteList = data.getValue();
 
-                    Pair<Double, Double> dot = iter.next();
-                    XYChart.Data chartElem = new XYChart.Data(dot.getKey(), dot.getValue());
-                    String colour = colours.get(paletteList.get(i/15) % colours.size());
+                    int i = 0;
+                    String nodeStyle = new String("-fx-background-radius: 1px ; -fx-padding: 1px ; ");
 
-                    series.getData().add(chartElem);
-                    chartElem.getNode().setStyle(nodeStyle + colour);
-                    i++;
+                    for (Iterator<Pair<Double, Double>> iter = dots.iterator(); iter.hasNext(); ) {
+
+                        Pair<Double, Double> dot = iter.next();
+                        XYChart.Data chartElem = new XYChart.Data(dot.getKey(), dot.getValue());
+                        String colour = colours.get(paletteList.get(i/dotsByCell) % colours.size());
+
+                        series.getData().add(chartElem);
+                        chartElem.getNode().setStyle(nodeStyle + colour);
+                        i++;
+                    }
+                }
+
+                else {
+
+                    // recording calculation time from here
+                    startTime = System.nanoTime();
+
+                    List<Pair<Double, Double>> data =
+                            logic.crBuilderSimple(crSetXField.getText(), crSetYField.getText(),
+                                                cArea, Integer.parseInt(crSetIterationsField.getText()));
+
+                    endTime = System.nanoTime();
+                    System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
+
+                    for (Pair<Double, Double> dot : data) {
+                        series.getData().add(new XYChart.Data(dot.getKey(), dot.getValue()));
+                    }
                 }
             }
         });

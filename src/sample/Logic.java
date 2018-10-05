@@ -147,12 +147,11 @@ public class Logic {
         return result;
     }
 
-
-    public Pair<List<Pair<Double, Double>>, List<Short>> crBuilder(String f,
-                                                                    String g,
-                                                                    CellularArea initArea,
-                                                                    Integer fragDepth) {
-
+    public Pair<List<Pair<Double, Double>>, List<Short>> crBuilderTopSort(String f,
+                                                                         String g,
+                                                                         CellularArea initArea,
+                                                                         Integer fragDepth,
+                                                                          Integer dotsByCell) {
         if (fragDepth < 0) {
 
             System.err.println("crBuilder: fragmentation depth must be 0+");
@@ -167,15 +166,10 @@ public class Logic {
         eF.addArguments(xArg, yArg);
         eG.addArguments(xArg, yArg);
 
-
-        // TODO branching for colouring
-
         ComponentGraph cgInit = new ComponentGraph();
 
         initArea.doInitialFragmentation(cgInit);
         initArea.fillSymbolicImage(cgInit, eF, eG);
-
-        //initArea.markAsDiscarded(cgInit.tarjan());
         cgInit.tarjan();
         initArea.markupEntireArea(cgInit);
 
@@ -187,8 +181,6 @@ public class Logic {
 
             initArea.doRegularFragmentation(cg);
             initArea.fillSymbolicImage(cg, eF, eG);
-
-            //initArea.markAsDiscarded(cg.tarjan());
             cg.tarjan();
             initArea.markupEntireArea(cg);
 
@@ -212,9 +204,49 @@ public class Logic {
             }
         }
 
-        //List<Pair<Double, Double>> result = initArea.getActiveArea(20);
-        //return result;
+        return initArea.getActiveColouredArea(dotsByCell);
+    }
 
-        return initArea.getActiveColouredArea(15);
+
+    public List<Pair<Double, Double>> crBuilderSimple(String f,
+                                                     String g,
+                                                     CellularArea initArea,
+                                                     Integer fragDepth) {
+
+        if (fragDepth < 0) {
+
+            System.err.println("crBuilder: fragmentation depth must be 0+");
+            return null;
+        }
+
+        Expression eF = new Expression(f);
+        Expression eG = new Expression(g);
+        Argument xArg = new Argument("x", 0.0);
+        Argument yArg = new Argument("y", 0.0);
+
+        eF.addArguments(xArg, yArg);
+        eG.addArguments(xArg, yArg);
+
+        ComponentGraph cgInit = new ComponentGraph();
+
+        initArea.doInitialFragmentation(cgInit);
+        initArea.fillSymbolicImage(cgInit, eF, eG);
+        initArea.markAsDiscarded(cgInit.tarjan());
+
+        cgInit.printContent();
+
+        for (Integer i = 0; i < fragDepth; i++) {
+
+            ComponentGraph cg = new ComponentGraph();
+
+            initArea.doRegularFragmentation(cg);
+            initArea.fillSymbolicImage(cg, eF, eG);
+            initArea.markAsDiscarded(cg.tarjan());
+
+            cg.printContent();
+        }
+
+        List<Pair<Double, Double>> result = initArea.getActiveArea(20);
+        return result;
     }
 }
