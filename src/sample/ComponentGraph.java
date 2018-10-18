@@ -9,6 +9,7 @@ public class ComponentGraph {
         // id represents some additional info about node, e.g. cluster index for which this node belongs,
         // initial value -1 as default non-marked node.
         public int index = -1, lowLink = -1, id = -1;
+        public double weight = -1;
         public List<Integer> content;
 
         public Node(List<Integer> content) {
@@ -35,6 +36,10 @@ public class ComponentGraph {
     // topological sorting data
     private Stack<Node>  greyNodes = new Stack<>();
     private List<Node> blackListed = new ArrayList<>();
+
+    // whether the graph is SCC itself with continuously numbered nodes from 0
+    // let SCC+such_numeration = Well Organized Graph
+    private boolean isWOG = false;
 
 
     // Node fabricating
@@ -225,6 +230,215 @@ public class ComponentGraph {
 
         return this.blackListed;
     }
+
+    private boolean isInf(double val, double inf) {
+
+        if (inf < 0 && val < inf+1.0 ||
+                inf > 0 && val > inf-1.0) {
+            return true;
+        }
+
+        else return false;
+    }
+
+    // returns number of valid rows
+    private int dpFill(double[][] dp, double inf, boolean inverseWeights) {
+
+        // vNum + 1
+        int rows = dp.length;
+
+        // initializing
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < dp[i].length; j++) {
+                dp[i][j] = inf;
+            }
+        }
+
+        // shortest distance from first vertex
+        // to itself consisting of 0 edges
+        dp[0][0] = 0;
+
+        // reorganizing links structure (reversing)
+        Map<Node, List<Node>> fromNodes = new HashMap<>();
+
+        for (Map.Entry<Node, List<Node>> entry : links.entrySet()) {
+
+            Node node = entry.getKey();
+
+            if (inverseWeights) { node.weight = -node.weight; }
+            fromNodes.put(node, new ArrayList<>());
+        }
+
+        for (Map.Entry<Node, List<Node>> entry : links.entrySet()) {
+            for (Node node : entry.getValue()) {
+
+                fromNodes.get(node).add(entry.getKey());
+            }
+        }
+
+        Map<Integer, List<Node>> idNodes = new HashMap<>();
+
+        for (Map.Entry<Node, List<Node>> entry : fromNodes.entrySet()) {
+            idNodes.put(entry.getKey().id, entry.getValue());
+        }
+
+        for (int i = 1; i < rows; i++)
+        {
+            for (int j = 0; j < dp[i].length; j++)
+            {
+                List<Node> jLinks = idNodes.get(j);
+
+                for (int k = 0; k < jLinks.size(); k++)
+                {
+                    if (!isInf(dp[i-1][jLinks.get(k).id], inf))
+                    {
+                        double curr_wt = dp[i-1][jLinks.get(k).id] +
+                                jLinks.get(k).weight;
+
+                        if (isInf(dp[i][j], inf))
+                            dp[i][j] = curr_wt;
+                        else
+                            dp[i][j] = Math.min(dp[i][j], curr_wt);
+                    }
+                }
+            }
+        }
+
+        int rowsToIgnore = 0;
+
+        for (int i = rows-1; i > 0; i--) {
+
+            int infCounter = 0;
+
+            for (int j = 0; j < dp[i].length; j++) {
+                if (!isInf(dp[i][j], inf)) {
+                    break;
+                }
+
+                else {
+                    infCounter++;
+                }
+            }
+
+            if (infCounter == dp[i].length) {
+                rowsToIgnore++;
+            }
+        }
+
+//        for (int i = 0; i < rows; i++) {
+//            for (int j = 0; j < dp[i].length; j++) {
+//                System.out.print(dp[i][j] + " ");
+//            }
+//
+//            System.out.println();
+//        }
+
+//        System.out.println("Reduced " + rowsToIgnore);
+        return rowsToIgnore;
+    }
+
+    // MMC = extreme min mean cycle
+    // pls ensure that caller is Well Organized Graph
+    private double getMmcWeight(boolean inverseWeights) {
+
+        if (!this.isWOG) {
+
+            System.err.println("getMinMeanCycleWeight: given graph is not WOG");
+            return -1;
+        }
+
+        // number of vertices
+        int vNum = this.links.size();
+        double inf = -1000000.0;
+        // matrix for storing weights of paths from 1st node to another
+        double[][] dp = new double[vNum+1][vNum];
+        int rowsToIgnore = dpFill(dp, inf, inverseWeights);
+
+        double[] fracs = new double[vNum];
+
+        for (int i = 0; i < vNum; i++) {
+
+            fracs[i] = inf;
+        }
+
+        int lastRow = vNum - rowsToIgnore;
+
+        for (int i = 0; i < vNum; i++) {
+
+            // checking for nonInfinity
+            if (!isInf(dp[lastRow][i], inf)) {
+                for (int j = 0; j < lastRow; j++) {
+                    if (!isInf(dp[j][i], inf)) {
+                        fracs[i] = Math.max(((double) dp[lastRow][i]-dp[j][i])/(lastRow-j), fracs[i]);
+                    }
+                }
+            }
+        }
+
+        double min = 0;
+
+        for (int i = 0; i < vNum; i++) {
+            if (!isInf(fracs[i], inf)) {
+
+                min = fracs[i];
+                break;
+            }
+        }
+
+        for (int i = 0; i < vNum; i++) {
+
+            if (!isInf(fracs[i], inf) &&
+                    fracs[i] < min) {
+
+                min = fracs[i];
+            }
+        }
+
+        return min;
+    }
+
+    // XMC = extreme mean cycle (min or max)
+    // ensure concentratedNodes is filled
+    public void printXmcGraph() {
+
+        // iterating over all components, then calculating XMC for each
+        for (int i = 0; i < sccN; i++) {
+
+            ComponentGraph scc = new ComponentGraph();
+            Set<Node> nodePool = new HashSet<>(this.concentratedNodes.get(i));
+            int id = 0;
+
+            for (Node node : nodePool) {
+
+                node.id = id++;
+                scc.nodes.put(node.content, node);
+
+                List<Node> nodeLinks = new ArrayList<>();
+                scc.links.put(node, nodeLinks);
+
+                for (Node ngbr : this.links.get(node)) {
+                    if (nodePool.contains(ngbr)) {
+                        nodeLinks.add(ngbr);
+                    }
+                }
+            }
+
+            scc.isWOG = true;
+            System.out.println("[" + scc.getMmcWeight(false) + ", " +
+                    (-scc.getMmcWeight(true)) + "]");
+        }
+    }
+
+    public void fillWeights() {
+
+        int i = 0;
+
+        for (Node each : this.links.keySet()) {
+            each.weight = (i%2==0)? 1.0: -1.0;
+            i++;
+        }
+    }
+
 
     public void printContent() {
 

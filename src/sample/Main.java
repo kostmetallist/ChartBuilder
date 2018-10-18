@@ -36,7 +36,7 @@ public class Main extends Application {
         settingsStage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 400);
         settingsStage.setY(primaryScreenBounds.getMinY() + primaryScreenBounds.getHeight() - 650);
         settingsStage.setWidth(400);
-        settingsStage.setHeight(350);
+        settingsStage.setHeight(400);
 
         settingsStage.show();
     }

@@ -151,7 +151,8 @@ public class Logic {
                                                                          String g,
                                                                          CellularArea initArea,
                                                                          Integer fragDepth,
-                                                                          Integer dotsByCell) {
+                                                                          Integer dotsByCell,
+                                                                          boolean xmcDetection) {
         if (fragDepth < 0) {
 
             System.err.println("crBuilder: fragmentation depth must be 0+");
@@ -188,6 +189,12 @@ public class Logic {
 
             if (i == fragDepth-1) {
 
+                if (xmcDetection) {
+
+                    cg.fillWeights();
+                    cg.printXmcGraph();
+                }
+
                 ComponentGraph subGraph = cg.createConcentratedGraph();
                 System.out.println("Concentrated: ");
                 subGraph.printContent();
@@ -211,7 +218,8 @@ public class Logic {
     public List<Pair<Double, Double>> crBuilderSimple(String f,
                                                      String g,
                                                      CellularArea initArea,
-                                                     Integer fragDepth) {
+                                                     Integer fragDepth,
+                                                      boolean xmcDetection) {
 
         if (fragDepth < 0) {
 
@@ -244,6 +252,12 @@ public class Logic {
             initArea.markAsDiscarded(cg.tarjan());
 
             cg.printContent();
+
+            if (i == fragDepth-1 && xmcDetection) {
+
+                cg.fillWeights();
+                cg.printXmcGraph();
+            }
         }
 
         List<Pair<Double, Double>> result = initArea.getActiveArea(20);

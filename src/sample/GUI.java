@@ -353,8 +353,12 @@ public class GUI {
         topSortCheckBox.setSelected(false);
         crSetGridPane.add(topSortCheckBox, 0, 7);
 
+        CheckBox xmcDetectionCheckBox = new CheckBox("XtremeMeanCycles");
+        xmcDetectionCheckBox.setSelected(false);
+        crSetGridPane.add(xmcDetectionCheckBox, 0, 8);
+
         Button crSetGoButton = new Button("Build");
-        crSetGridPane.add(crSetGoButton, 2, 7);
+        crSetGridPane.add(crSetGoButton, 2, 8);
 
         crSetGoButton.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -372,6 +376,7 @@ public class GUI {
                                                     30, 20, new ArrayList<>());
 
                 long startTime, endTime;
+                boolean xmcDet = xmcDetectionCheckBox.isSelected();
 
                 if (topSortCheckBox.isSelected()) {
 
@@ -381,7 +386,8 @@ public class GUI {
                     int dotsByCell = 15;
                     Pair<List<Pair<Double, Double>>, List<Short>> data =
                             logic.crBuilderTopSort(crSetXField.getText(), crSetYField.getText(),
-                                                cArea, Integer.parseInt(crSetIterationsField.getText()), dotsByCell);
+                                                cArea, Integer.parseInt(crSetIterationsField.getText()), dotsByCell,
+                                                xmcDet);
                     endTime = System.nanoTime();
                     System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
 
@@ -410,7 +416,7 @@ public class GUI {
 
                     List<Pair<Double, Double>> data =
                             logic.crBuilderSimple(crSetXField.getText(), crSetYField.getText(),
-                                                cArea, Integer.parseInt(crSetIterationsField.getText()));
+                                                cArea, Integer.parseInt(crSetIterationsField.getText()), xmcDet);
 
                     endTime = System.nanoTime();
                     System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
