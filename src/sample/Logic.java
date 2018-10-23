@@ -191,7 +191,7 @@ public class Logic {
 
                 if (xmcDetection) {
 
-                    cg.fillWeights();
+                    cg.fillPulsarWeights();
                     cg.printXmcGraph();
                 }
 
@@ -255,7 +255,7 @@ public class Logic {
 
             if (i == fragDepth-1 && xmcDetection) {
 
-                cg.fillWeights();
+                cg.fillJacobianWeights(initArea);
                 cg.printXmcGraph();
             }
         }

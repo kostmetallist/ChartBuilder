@@ -1,6 +1,8 @@
 package sample;
 
 import java.util.*;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 public class ComponentGraph {
 
@@ -429,13 +431,48 @@ public class ComponentGraph {
         }
     }
 
-    public void fillWeights() {
+    public void fillPulsarWeights() {
 
         int i = 0;
 
         for (Node each : this.links.keySet()) {
+
             each.weight = (i%2==0)? 1.0: -1.0;
             i++;
+        }
+    }
+
+    // ca is the CellularArea object that's associated with current graph
+    public void fillJacobianWeights(CellularArea ca) {
+
+        for (Node each : this.links.keySet()) {
+
+            CellularArea finalCell = ca.getCellById(each.content);
+
+            // getting middle point
+            double x = (finalCell.getFinishX()-finalCell.getStartX())/2 + finalCell.getStartX();
+            double y = (finalCell.getFinishY()-finalCell.getStartY())/2 + finalCell.getStartY();
+
+            double TT  = 0.4 - 6/(1 + x*x + y*y);
+            double TTX = 12*x/((1+x*x+y*y)*(1+x*x+y*y));
+            double TTY = 12*y/((1+x*x+y*y)*(1+x*x+y*y));
+
+            double dfdx = 0.9*(cos(TT)*(1 - y*TTX)  - x*TTX*sin(TT));
+            double dfdy = 0.9*(sin(TT)*(-1 - x*TTY) - y*TTY*cos(TT));
+            double dgdx = 0.9*(sin(TT)*(1 - y*TTX)  + x*TTX*cos(TT));
+            double dgdy = 0.9*(cos(TT)*(1 + x*TTY)  - y*TTY*sin(TT));
+
+            double b11 = dfdx*dfdx + dgdx*dgdx;
+            double b12 = dfdx*dfdy + dgdx*dgdy;
+            double b21 = dfdy*dfdx + dgdy*dgdx;
+            double b22 = dfdy*dfdy + dgdy*dgdy;
+
+            double dRoot = Math.sqrt((b11+b22)*(b11+b22) - 4*(b11*b22 - b12*b21));
+
+            double k1 = (b11+b22+dRoot)/2;
+            double k2 = (b11+b22-dRoot)/2;
+
+            each.weight = Math.log(Math.max(k1, k2))/2;
         }
     }
 
