@@ -26,6 +26,7 @@ public class CellularArea {
     private CellStatus status = CellStatus.ACTIVE;
     private List<Integer> id;
     private short colour = 0;
+    private double z;
     private List<CellularArea> children = new ArrayList<>();
 
 
@@ -133,6 +134,10 @@ public class CellularArea {
     public short getColour() { return colour; }
 
     public void setColour(short colour) { this.colour = colour; }
+
+    public double getZ() { return z; }
+
+    public void setZ(double z) { this.z = z; }
 
     public List<CellularArea> getChildren() {
         return children;
@@ -329,6 +334,23 @@ public class CellularArea {
         for (CellularArea each : this.children) { each.getRandomColouredPoints(amount, generalList, paletteList); }
     }
 
+    public void getRandom3dPoints(List<Dot3d> generalList) {
+
+        if (this.children.isEmpty() && this.getStatus() == CellStatus.ACTIVE) {
+
+            Double areaWidth = this.finishX - this.startX;
+            Double areaHeight = this.finishY - this.startY;
+            Double randX = this.startX + random() * areaWidth;
+            Double randY = this.startY + random() * areaHeight;
+            Dot3d dot = new Dot3d(randX, randY, this.z);
+
+            generalList.add(dot);
+            return;
+        }
+
+        for (CellularArea each : this.children) { each.getRandom3dPoints(generalList); }
+    }
+
     public List<Pair<Double, Double>> getActiveArea(int dotsByCell) {
 
         List<Pair<Double, Double>> result = new ArrayList<>();
@@ -344,6 +366,14 @@ public class CellularArea {
 
         this.getRandomColouredPoints(dotsByCell, result, paletteList);
         return new Pair<>(result, paletteList);
+    }
+
+    public List<Dot3d> getActiveSurface() {
+
+        List<Dot3d> result = new ArrayList<>();
+
+        this.getRandom3dPoints(result);
+        return result;
     }
 
     public void fillSymbolicImage(ComponentGraph cg,
@@ -407,6 +437,52 @@ public class CellularArea {
                 else { this.getCellById(node.content).setColour(i); }
             }
             i++;
+        }
+    }
+
+    // cg must be one of the sets from the concentrated nodes of parent ComponentGraph
+    public void setSccAltitudes(ComponentGraph cg,
+                                double divisor,
+                                int iterNum) {
+
+        double[] sumRows = cg.constructWogFlow(iterNum);
+
+        for (ComponentGraph.Node node : cg.getLinks().keySet()) {
+
+            CellularArea appropriateCell = this.getCellById(node.content);
+            appropriateCell.setZ(sumRows[node.id]/divisor);
+        }
+    }
+
+    // generally, cg should represent appropriate to this CellularArea graph
+    public void setAllAltitudes(ComponentGraph cg,
+                                double divisor,
+                                int iterNum) {
+
+        for (int i = 0; i < cg.getSccNumber(); i++) {
+
+            ComponentGraph scc = new ComponentGraph();
+            Set<ComponentGraph.Node> nodePool = new HashSet<>(cg.getConcentratedNodes().get(i));
+            int id = 0;
+
+            for (ComponentGraph.Node node : nodePool) {
+
+                node.id = id++;
+                scc.nodes.put(node.content, node);
+
+                List<ComponentGraph.Node> nodeLinks = new ArrayList<>();
+                scc.links.put(node, nodeLinks);
+
+                for (ComponentGraph.Node ngbr : cg.getLinks().get(node)) {
+                    if (nodePool.contains(ngbr)) {
+                        nodeLinks.add(ngbr);
+                    }
+                }
+            }
+
+            System.out.println("Prepared scc #" + i + " for flow computing");
+            scc.setIsWog(true);
+            setSccAltitudes(scc, divisor, iterNum);
         }
     }
 }

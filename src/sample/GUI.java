@@ -1,5 +1,9 @@
 package sample;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.FileWriter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
@@ -373,7 +377,7 @@ public class GUI {
 
                 CellularArea cArea = new CellularArea(startX, startY,
                                                         finishX, finishY,
-                                                    30, 20, new ArrayList<>());
+                                                    40, 40, new ArrayList<>());
 
                 long startTime, endTime;
                 boolean xmcDet = xmcDetectionCheckBox.isSelected();
@@ -412,18 +416,43 @@ public class GUI {
                 else {
 
                     // recording calculation time from here
+//                    startTime = System.nanoTime();
+//
+//                    List<Pair<Double, Double>> data =
+//                            logic.crBuilderSimple(crSetXField.getText(), crSetYField.getText(),
+//                                                cArea, Integer.parseInt(crSetIterationsField.getText()), xmcDet);
+//
+//                    endTime = System.nanoTime();
+//                    System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
+//
+//                    for (Pair<Double, Double> dot : data) {
+//                        series.getData().add(new XYChart.Data(dot.getKey(), dot.getValue()));
+//                    }
+
                     startTime = System.nanoTime();
 
-                    List<Pair<Double, Double>> data =
-                            logic.crBuilderSimple(crSetXField.getText(), crSetYField.getText(),
-                                                cArea, Integer.parseInt(crSetIterationsField.getText()), xmcDet);
+                    List<Dot3d> surface = logic.crBuilder3d(crSetXField.getText(), crSetYField.getText(),
+                                                            cArea, Integer.parseInt(crSetIterationsField.getText()));
 
                     endTime = System.nanoTime();
                     System.out.println("CR-set built in " + ((endTime-startTime)/1000000) + " ms");
 
-                    for (Pair<Double, Double> dot : data) {
-                        series.getData().add(new XYChart.Data(dot.getKey(), dot.getValue()));
+                    try {
+                        FileWriter fileWriter = new FileWriter("data/ikeda.csv");
+                        PrintWriter printWriter = new PrintWriter(fileWriter);
+
+                        for (Dot3d dot : surface) {
+                            printWriter.println(dot.x + "," + dot.y + "," + dot.z);
+                        }
+
+                        printWriter.close();
                     }
+
+                    catch (IOException e) {
+                        System.err.println("IOException while working with CSV");
+                    }
+
+                    System.out.println("CSV file is ready");
                 }
             }
         });

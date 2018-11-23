@@ -263,4 +263,57 @@ public class Logic {
         List<Pair<Double, Double>> result = initArea.getActiveArea(20);
         return result;
     }
+
+    public List<Dot3d> crBuilder3d(String f,
+                                   String g,
+                                   CellularArea initArea,
+                                   Integer fragDepth) {
+
+        if (fragDepth < 0) {
+
+            System.err.println("crBuilder: fragmentation depth must be 0+");
+            return null;
+        }
+
+        Expression eF = new Expression(f);
+        Expression eG = new Expression(g);
+        Argument xArg = new Argument("x", 0.0);
+        Argument yArg = new Argument("y", 0.0);
+
+        eF.addArguments(xArg, yArg);
+        eG.addArguments(xArg, yArg);
+
+        ComponentGraph cgInit = new ComponentGraph();
+
+        initArea.doInitialFragmentation(cgInit);
+        initArea.fillSymbolicImage(cgInit, eF, eG);
+        initArea.markAsDiscarded(cgInit.tarjan());
+
+        double cellW = initArea.getCellWidth();
+        double cellH = initArea.getCellHeight();
+
+        cgInit.printContent();
+
+        for (Integer i = 0; i < fragDepth; i++) {
+
+            ComponentGraph cg = new ComponentGraph();
+
+            initArea.doRegularFragmentation(cg);
+            initArea.fillSymbolicImage(cg, eF, eG);
+            initArea.markAsDiscarded(cg.tarjan());
+
+            cellW /= 2;
+            cellH /= 2;
+
+            cg.printContent();
+
+            if (i == fragDepth-1) {
+
+                initArea.setAllAltitudes(cg, cellW*cellH, 10);
+            }
+        }
+
+        List<Dot3d> result = initArea.getActiveSurface();
+        return result;
+    }
 }

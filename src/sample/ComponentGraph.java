@@ -72,6 +72,8 @@ public class ComponentGraph {
 
     public int getSccNumber() { return this.sccN; }
 
+    public void setIsWog(boolean isWOG) { this.isWOG = isWOG; }
+
     // returns set of transit nodes (not scc)
     public Set<Node> tarjan() {
 
@@ -431,6 +433,119 @@ public class ComponentGraph {
         }
     }
 
+    private void transformFlowMatrix(double[][] flowMatrix, int vNum) {
+
+        double matrixSum = 0.0;
+
+        for (int i = 0; i < vNum; i++) {
+            for (int j = 0; j < vNum; j++) {
+
+                matrixSum += flowMatrix[i][j];
+            }
+        }
+
+        for (int i = 0; i < vNum; i++) {
+            for (int j = 0; j < vNum; j++) {
+
+                flowMatrix[i][j] /= matrixSum;
+            }
+        }
+
+        for (int i = 0; i < vNum; i++) {
+
+            double sumColumn = 0.0, sumRow = 0.0;
+
+            for (int m = 0; m < vNum; m++) {
+                if (m != i) sumColumn += flowMatrix[m][i];
+            }
+
+            for (int l = 0; l < vNum; l++) {
+                if (l != i) sumRow += flowMatrix[i][l];
+            }
+
+            double jCoef = Math.sqrt(sumColumn/sumRow);
+            double kCoef = Math.sqrt(sumRow/sumColumn);
+
+            for (int j = 0; j < vNum; j++) {
+                if (j != i) flowMatrix[i][j] *= jCoef;
+            }
+
+            for (int k = 0; k < vNum; k++) {
+                if (k != i) flowMatrix[k][i] *= kCoef;
+            }
+        }
+    }
+
+    // ensure caller is WOG
+    public double[] constructWogFlow(int iterNum) {
+
+        if (!this.isWOG) {
+
+            System.err.println("constructWogFlow: given graph is not WOG");
+            return null;
+        }
+
+        // num of vertices
+        int vNum = this.links.size();
+        // building incidence matrix as initial state of flow matrix
+        double flowMatrix[][] = new double[vNum][vNum];
+
+        for (int i = 0; i < vNum; i++) {
+            for (int j = 0; j < vNum; j++) {
+
+                flowMatrix[i][j] = 0.0;
+            }
+        }
+
+        for (Map.Entry<Node, List<Node>> entry : this.links.entrySet()) {
+
+            int i = entry.getKey().id;
+
+            for (Node each : entry.getValue()) {
+
+                flowMatrix[i][each.id] = 1.0;
+            }
+        }
+
+//        for (int i = 0; i < vNum; i++) {
+//            for (int j = 0; j < vNum; j++) {
+//
+//                System.out.print(flowMatrix[i][j] + " ");
+//            }
+//            System.out.println();
+//            System.out.println();
+//        }
+
+
+        for (int t = 0; t < iterNum; t++) {
+            transformFlowMatrix(flowMatrix, vNum);
+        }
+
+//        for (int i = 0; i < vNum; i++) {
+//            for (int j = 0; j < vNum; j++) {
+//
+//                System.out.print(flowMatrix[i][j] + " ");
+//            }
+//            System.out.println();
+//            System.out.println();
+//        }
+
+        double[] rowSums = new double[vNum];
+
+        for (int k = 0; k < vNum; k++) {
+
+            double sum = 0;
+
+            for (int m = 0; m < vNum; m++) {
+                sum += flowMatrix[k][m];
+            }
+
+            rowSums[k] = sum;
+        }
+
+        return rowSums;
+    }
+
     public void fillPulsarWeights() {
 
         int i = 0;
@@ -461,6 +576,11 @@ public class ComponentGraph {
             double dfdy = 0.9*(sin(TT)*(-1 - x*TTY) - y*TTY*cos(TT));
             double dgdx = 0.9*(sin(TT)*(1 - y*TTX)  + x*TTX*cos(TT));
             double dgdy = 0.9*(cos(TT)*(1 + x*TTY)  - y*TTY*sin(TT));
+
+//            double dfdx = 2*x;
+//            double dfdy = -2*y;
+//            double dgdx = 2*y;
+//            double dgdy = 2*x;
 
             double b11 = dfdx*dfdx + dgdx*dgdx;
             double b12 = dfdx*dfdy + dgdx*dgdy;
